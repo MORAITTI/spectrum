@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Научный спектр • MORAITTI</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: #0a0a0a; color:#f0f0f0; font-family: 'Segoe UI', system-ui, sans-serif;
+      overflow: hidden; height:100vh; width:100vw; position:relative;
+      transition: background 0.4s, color 0.4s;
+    }
+    body.inverted { background:#f0f0f0; color:#0a0a0a; }
+    #waveCanvas {
+      position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:1; display:block;
+    }
+    .grid-overlay {
+      position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:2; pointer-events:none;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      transition: opacity 0.4s;
+    }
+    body.inverted .grid-overlay {
+      background-image: linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px);
+    }
+    .scope-lines {
+      position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:2; pointer-events:none;
+      background:
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.06) 39px, rgba(255,255,255,0.06) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.06) 39px, rgba(255,255,255,0.06) 40px);
+      transition: opacity 0.4s;
+    }
+    body.inverted .scope-lines {
+      background:
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(0,0,0,0.08) 39px, rgba(0,0,0,0.08) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0,0,0,0.08) 39px, rgba(0,0,0,0.08) 40px);
+    }
+    .content {
+      position:fixed; z-index:3; top:50%; left:50%; transform:translate(-50%,-50%);
+      text-align:center; pointer-events:none; user-select:none; width:90%; max-width:900px;
+    }
+    .content h1 {
+      font-size: clamp(3rem, 12vw, 6rem); font-weight:300; letter-spacing:0.15em; text-transform:uppercase;
+      background: linear-gradient(135deg, #eee 0%, #777 50%, #eee 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      text-shadow: 0 0 40px rgba(255,255,255,0.1); margin-bottom:0.2em; animation: fadeIn 2s ease-out;
+    }
+    body.inverted .content h1 {
+      background: linear-gradient(135deg, #222 0%, #888 50%, #222 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .content .sub {
+      font-size: clamp(1rem, 3vw, 1.8rem); font-weight:300; letter-spacing:0.4em;
+      color: rgba(255,255,255,0.5); border-top:1px solid rgba(255,255,255,0.1);
+      border-bottom:1px solid rgba(255,255,255,0.1); display:inline-block; padding:0.4em 1.2em;
+      backdrop-filter:blur(2px); animation: fadeInUp 2.4s ease-out;
+    }
+    body.inverted .content .sub { color:rgba(0,0,0,0.5); border-color:rgba(0,0,0,0.1); }
+    .digits {
+      position:fixed; bottom:80px; left:30px; z-index:4;
+      font-family: 'Courier New', monospace; font-size:14px; letter-spacing:1px;
+      color: rgba(255,255,255,0.3); pointer-events:none; user-select:none; line-height:1.8;
+      animation: fadeInUp 3s ease-out; transition: color 0.4s;
+    }
+    body.inverted .digits { color:rgba(0,0,0,0.3); }
+    .digits .value { color:rgba(255,255,255,0.6); }
+    body.inverted .digits .value { color:rgba(0,0,0,0.7); }
+    .controls {
+      position:fixed; bottom:30px; right:30px; z-index:4;
+      background: rgba(10,10,10,0.7); backdrop-filter:blur(8px);
+      border:1px solid rgba(255,255,255,0.08); border-radius:12px;
+      padding:18px 22px; min-width:200px;
+      display:flex; flex-direction:column; gap:10px;
+      animation: fadeInUp 3.5s ease-out;
+      transition: background 0.4s, border-color 0.4s;
+      max-height: 90vh; overflow-y: auto;
+    }
+    body.inverted .controls {
+      background: rgba(240,240,240,0.8); border-color:rgba(0,0,0,0.1);
+    }
+    .controls label {
+      display:flex; justify-content:space-between; align-items:center;
+      font-size:11px; letter-spacing:0.5px; color:rgba(255,255,255,0.4);
+      text-transform:uppercase; font-family:'Courier New', monospace;
+      transition:color 0.4s;
+    }
+    body.inverted .controls label { color:rgba(0,0,0,0.5); }
+    .controls input[type="range"] {
+      width:100px; height:2px; -webkit-appearance:none; appearance:none;
+      background: rgba(255,255,255,0.15); outline:none; border-radius:2px;
+      transition: background 0.2s;
+      flex-shrink:0;
+    }
+    body.inverted .controls input[type="range"] { background:rgba(0,0,0,0.15); }
+    .controls input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance:none; appearance:none; width:10px; height:10px;
+      border-radius:50%; background:#aaa; cursor:pointer; transition:background 0.2s;
+      border:1px solid rgba(255,255,255,0.2);
+    }
+    .controls input[type="range"]::-webkit-slider-thumb:hover { background:#fff; }
+    body.inverted .controls input[type="range"]::-webkit-slider-thumb {
+      background:#555; border-color:rgba(0,0,0,0.2);
+    }
+    body.inverted .controls input[type="range"]::-webkit-slider-thumb:hover { background:#000; }
+    .controls .val {
+      color: rgba(255,255,255,0.7); font-weight:300; min-width:30px; text-align:right;
+      transition:color 0.4s; font-size:11px;
+    }
+    body.inverted .controls .val { color:rgba(0,0,0,0.7); }
+    .mode-buttons {
+      display:flex; gap:4px; flex-wrap:wrap; margin-top:2px;
+    }
+    .mode-btn, .invert-btn, .autopilot-btn, .screenshot-btn, .pause-btn {
+      background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.4); padding:4px 8px; border-radius:6px;
+      cursor:pointer; font-family:'Courier New', monospace; font-size:9px;
+      letter-spacing:0.5px; text-transform:uppercase; transition:all 0.2s;
+      flex:1; min-width:36px; text-align:center;
+    }
+    body.inverted .mode-btn, body.inverted .invert-btn,
+    body.inverted .autopilot-btn, body.inverted .screenshot-btn,
+    body.inverted .pause-btn {
+      background:rgba(0,0,0,0.05); border-color:rgba(0,0,0,0.1); color:rgba(0,0,0,0.4);
+    }
+    .mode-btn.active {
+      background: rgba(255,255,255,0.15); color:#fff; border-color:rgba(255,255,255,0.3);
+    }
+    body.inverted .mode-btn.active {
+      background:rgba(0,0,0,0.15); color:#000; border-color:rgba(0,0,0,0.3);
+    }
+    .mode-btn:hover, .invert-btn:hover, .autopilot-btn:hover,
+    .screenshot-btn:hover, .pause-btn:hover {
+      background:rgba(255,255,255,0.1); color:#fff;
+    }
+    body.inverted .mode-btn:hover, body.inverted .invert-btn:hover,
+    body.inverted .autopilot-btn:hover, body.inverted .screenshot-btn:hover,
+    body.inverted .pause-btn:hover {
+      background:rgba(0,0,0,0.1); color:#000;
+    }
+    .autopilot-btn.active {
+      background: rgba(255,200,100,0.2); border-color: rgba(255,200,100,0.4);
+      color: #ffd700;
+    }
+    body.inverted .autopilot-btn.active {
+      background: rgba(200,150,50,0.2); border-color: rgba(200,150,50,0.4);
+      color: #b8860b;
+    }
+    .pause-btn.active {
+      background: rgba(100,200,255,0.15); border-color: rgba(100,200,255,0.3);
+      color: #7ec8e3;
+    }
+    body.inverted .pause-btn.active {
+      background: rgba(50,150,200,0.15); border-color: rgba(50,150,200,0.3);
+      color: #2a7a9e;
+    }
+    .btn-reset {
+      background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.4); padding:6px 12px; border-radius:6px;
+      cursor:pointer; font-family:'Courier New', monospace; font-size:11px;
+      letter-spacing:1px; text-transform:uppercase; transition:all 0.2s; margin-top:2px;
+    }
+    body.inverted .btn-reset {
+      background:rgba(0,0,0,0.05); border-color:rgba(0,0,0,0.1); color:rgba(0,0,0,0.4);
+    }
+    .btn-reset:hover {
+      background:rgba(255,255,255,0.1); color:#fff; border-color:rgba(255,255,255,0.3);
+    }
+    body.inverted .btn-reset:hover {
+      background:rgba(0,0,0,0.1); color:#000; border-color:rgba(0,0,0,0.3);
+    }
+    .credit {
+      position:fixed; bottom:24px; right:30px; z-index:4;
+      font-family:'Courier New', monospace; font-size:14px; letter-spacing:3px;
+      color: rgba(255,255,255,0.15); pointer-events:none; user-select:none;
+      text-transform:uppercase; animation: fadeInUp 4s ease-out;
+      transition: color 0.4s;
+    }
+    body.inverted .credit { color:rgba(0,0,0,0.15); }
+    @keyframes fadeIn {
+      0% { opacity:0; transform:scale(0.96); }
+      100% { opacity:1; transform:scale(1); }
+    }
+    @keyframes fadeInUp {
+      0% { opacity:0; transform:translateY(20px); }
+      100% { opacity:1; transform:translateY(0); }
+    }
+    .cursor-glow {
+      position:fixed; width:200px; height:200px; border-radius:50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+      pointer-events:none; z-index:2; transform:translate(-50%,-50%);
+      transition: left 0.05s, top 0.05s; mix-blend-mode: screen;
+      will-change:left, top;
+    }
+    body.inverted .cursor-glow {
+      background: radial-gradient(circle, rgba(0,0,0,0.06) 0%, transparent 70%);
+      mix-blend-mode: multiply;
+    }
+    /* адаптация под телефон */
+    @media (max-width: 700px) {
+      .controls { right: 6px; bottom: 6px; padding: 10px 12px; min-width: 120px; gap: 6px; }
+      .controls input[type="range"] { width: 60px; }
+      .controls label { font-size: 8px; }
+      .controls .val { font-size: 8px; min-width: 20px; }
+      .digits { left: 6px; bottom: 40px; font-size: 9px; line-height: 1.5; }
+      .credit { bottom: 6px; right: 8px; font-size: 9px; }
+      .mode-btn, .invert-btn, .autopilot-btn, .screenshot-btn, .pause-btn {
+        font-size: 6px; padding: 2px 4px; min-width: 26px;
+      }
+      .btn-reset { font-size: 8px; padding: 3px 6px; }
+      .content h1 { font-size: clamp(2rem, 10vw, 3.5rem); }
+      .content .sub { font-size: clamp(0.7rem, 2vw, 1rem); }
+    }
+    @media (max-width: 450px) {
+      .controls { right: 3px; bottom: 3px; padding: 6px 8px; min-width: 90px; }
+      .controls input[type="range"] { width: 40px; }
+      .digits { font-size: 7px; left: 3px; bottom: 30px; }
+      .mode-btn, .invert-btn, .autopilot-btn, .screenshot-btn, .pause-btn {
+        font-size: 5px; padding: 1px 3px; min-width: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="waveCanvas"></canvas>
+  <div class="grid-overlay"></div>
+  <div class="scope-lines"></div>
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <div class="content">
+    <h1>Спектр</h1>
+    <div class="sub">Harmonic Analysis</div>
+  </div>
+
+  <div class="digits" id="digits">
+    <span>ЧАСТОТА  <span class="value" id="freqDisplay">0.008</span></span><br>
+    <span>АМПЛИТУДА <span class="value" id="ampDisplay">60</span></span><br>
+    <span>ГАРМОНИКИ <span class="value" id="harmDisplay">3</span></span><br>
+    <span>СКОРОСТЬ  <span class="value" id="speedDisplay">1.0</span></span>
+  </div>
+
+  <div class="controls">
+    <label>Частота <input type="range" id="freqSlider" min="0.002" max="0.025" step="0.001" value="0.008"><span class="val" id="freqVal">0.008</span></label>
+    <label>Амплитуда <input type="range" id="ampSlider" min="10" max="100" step="1" value="60"><span class="val" id="ampVal">60</span></label>
+    <label>Гармоники <input type="range" id="harmSlider" min="1" max="5" step="1" value="3"><span class="val" id="harmVal">3</span></label>
+    <label>Скорость <input type="range" id="speedSlider" min="0.2" max="2.0" step="0.1" value="1.0"><span class="val" id="speedVal">1.0</span></label>
+
+    <!-- Новые слайдеры -->
+    <label>Фаза <input type="range" id="phaseSlider" min="0" max="6.28" step="0.01" value="0"><span class="val" id="phaseVal">0.00</span></label>
+    <label>Затухание <input type="range" id="dampingSlider" min="0" max="1" step="0.01" value="0.1"><span class="val" id="dampingVal">0.10</span></label>
+    <label>Отн. частот <input type="range" id="ratioSlider" min="0.5" max="3" step="0.1" value="1.5"><span class="val" id="ratioVal">1.5</span></label>
+
+    <div class="mode-buttons">
+      <button class="mode-btn active" data-mode="wave">Wave</button>
+      <button class="mode-btn" data-mode="spectrum">Spec</button>
+      <button class="mode-btn" data-mode="lissajous">Liss</button>
+      <button class="mode-btn" data-mode="surface">3D</button>
+      <button class="mode-btn" data-mode="polar">Polar</button>
+      <button class="mode-btn" data-mode="phase">Phase</button>
+      <button class="mode-btn" data-mode="spectrogram">Sgram</button>
+    </div>
+
+    <div style="display:flex; gap:4px; flex-wrap:wrap;">
+      <button class="pause-btn" id="pauseBtn">⏸ Пауза</button>
+      <button class="autopilot-btn" id="autopilotBtn">▶ Авто</button>
+      <button class="invert-btn" id="invertBtn">Invert</button>
+      <button class="screenshot-btn" id="screenshotBtn">🖼 PNG</button>
+    </div>
+
+    <button class="btn-reset" id="resetBtn">⟳ Сброс</button>
+  </div>
+
+  <div class="credit">by MORAITTI</div>
+
+  <script>
+    (function() {
+      const canvas = document.getElementById('waveCanvas');
+      const ctx = canvas.getContext('2d');
+      let width, height;
+      let time = 0;
+      let paused = false;
+
+      // DOM
+      const freqSlider = document.getElementById('freqSlider');
+      const ampSlider = document.getElementById('ampSlider');
+      const harmSlider = document.getElementById('harmSlider');
+      const speedSlider = document.getElementById('speedSlider');
+      const phaseSlider = document.getElementById('phaseSlider');
+      const dampingSlider = document.getElementById('dampingSlider');
+      const ratioSlider = document.getElementById('ratioSlider');
+      const freqVal = document.getElementById('freqVal');
+      const ampVal = document.getElementById('ampVal');
+      const harmVal = document.getElementById('harmVal');
+      const speedVal = document.getElementById('speedVal');
+      const phaseVal = document.getElementById('phaseVal');
+      const dampingVal = document.getElementById('dampingVal');
+      const ratioVal = document.getElementById('ratioVal');
+      const freqDisplay = document.getElementById('freqDisplay');
+      const ampDisplay = document.getElementById('ampDisplay');
+      const harmDisplay = document.getElementById('harmDisplay');
+      const speedDisplay = document.getElementById('speedDisplay');
+      const resetBtn = document.getElementById('resetBtn');
+      const invertBtn = document.getElementById('invertBtn');
+      const autopilotBtn = document.getElementById('autopilotBtn');
+      const pauseBtn = document.getElementById('pauseBtn');
+      const screenshotBtn = document.getElementById('screenshotBtn');
+      const modeBtns = document.querySelectorAll('.mode-btn');
+
+      const defaults = {
+        freq: 0.008, amp: 60, harmonics: 3, speed: 1.0,
+        phase: 0, damping: 0.1, ratio: 1.5
+      };
+      let params = { ...defaults };
+      let currentMode = 'wave';
+      let inverted = false;
+      let autopilot = false;
+      let autopilotTimer = 0;
+
+      let waves = [
+        { amp: 60, freq: 0.008, phase: 0, color: 'rgba(255,255,255,0.8)' },
+        { amp: 40, freq: 0.015, phase: 1.2, color: 'rgba(200,200,200,0.6)' },
+        { amp: 25, freq: 0.025, phase: 2.8, color: 'rgba(150,150,150,0.4)' },
+        { amp: 15, freq: 0.04, phase: 4.1, color: 'rgba(100,100,100,0.3)' },
+      ];
+
+      const spectrumBands = 64;
+      let spectrumAmps = new Float32Array(spectrumBands);
+      const specgramHistory = [];
+      const specgramHeight = 120;
+
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function updateWaves() {
+        waves[0].amp = params.amp;
+        waves[0].freq = params.freq;
+        const baseAmp = params.amp;
+        const baseFreq = params.freq;
+        for (let i = 1; i < waves.length; i++) {
+          waves[i].freq = baseFreq * (1.2 + i * 0.5);
+          waves[i].amp = baseAmp / (1.2 + i * 0.3);
+        }
+        // Обновляем отображение
+        freqDisplay.textContent = baseFreq.toFixed(3);
+        ampDisplay.textContent = Math.round(baseAmp);
+        harmDisplay.textContent = params.harmonics;
+        speedDisplay.textContent = params.speed.toFixed(1);
+      }
+
+      function resetParams() {
+        params = { ...defaults };
+        freqSlider.value = params.freq;
+        ampSlider.value = params.amp;
+        harmSlider.value = params.harmonics;
+        speedSlider.value = params.speed;
+        phaseSlider.value = params.phase;
+        dampingSlider.value = params.damping;
+        ratioSlider.value = params.ratio;
+        freqVal.textContent = params.freq.toFixed(3);
+        ampVal.textContent = Math.round(params.amp);
+        harmVal.textContent = params.harmonics;
+        speedVal.textContent = params.speed.toFixed(1);
+        phaseVal.textContent = params.phase.toFixed(2);
+        dampingVal.textContent = params.damping.toFixed(2);
+        ratioVal.textContent = params.ratio.toFixed(1);
+        updateWaves();
+      }
+
+      // Обработчики слайдеров
+      freqSlider.addEventListener('input', function() {
+        params.freq = parseFloat(this.value);
+        freqVal.textContent = params.freq.toFixed(3);
+        updateWaves();
+      });
+      ampSlider.addEventListener('input', function() {
+        params.amp = parseFloat(this.value);
+        ampVal.textContent = Math.round(params.amp);
+        updateWaves();
+      });
+      harmSlider.addEventListener('input', function() {
+        params.harmonics = parseInt(this.value);
+        harmVal.textContent = params.harmonics;
+        updateWaves();
+      });
+      speedSlider.addEventListener('input', function() {
+        params.speed = parseFloat(this.value);
+        speedVal.textContent = params.speed.toFixed(1);
+        updateWaves();
+      });
+      phaseSlider.addEventListener('input', function() {
+        params.phase = parseFloat(this.value);
+        phaseVal.textContent = params.phase.toFixed(2);
+        // обновляем фазу волн
+        waves[0].phase = params.phase;
+      });
+      dampingSlider.addEventListener('input', function() {
+        params.damping = parseFloat(this.value);
+        dampingVal.textContent = params.damping.toFixed(2);
+      });
+      ratioSlider.addEventListener('input', function() {
+        params.ratio = parseFloat(this.value);
+        ratioVal.textContent = params.ratio.toFixed(1);
+      });
+
+      resetBtn.addEventListener('click', resetParams);
+
+      // Режимы
+      modeBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          modeBtns.forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentMode = this.dataset.mode;
+        });
+      });
+
+      // Инверсия
+      invertBtn.addEventListener('click', function() {
+        inverted = !inverted;
+        document.body.classList.toggle('inverted', inverted);
+        for (let w of waves) {
+          const alpha = parseFloat(w.color.match(/[\d.]+\)$/)[0]);
+          if (inverted) w.color = `rgba(0,0,0,${alpha})`;
+          else w.color = `rgba(255,255,255,${alpha})`;
+        }
+      });
+
+      // Автопилот
+      autopilotBtn.addEventListener('click', function() {
+        autopilot = !autopilot;
+        this.classList.toggle('active', autopilot);
+        this.textContent = autopilot ? '⏸ Авто' : '▶ Авто';
+      });
+
+      // Пауза
+      pauseBtn.addEventListener('click', function() {
+        paused = !paused;
+        this.classList.toggle('active', paused);
+        this.textContent = paused ? '▶ Играть' : '⏸ Пауза';
+      });
+
+      // Скриншот
+      screenshotBtn.addEventListener('click', function() {
+        const link = document.createElement('a');
+        link.download = 'spectrum_screenshot.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+
+      // Обновление спектра
+      function updateSpectrum() {
+        for (let i = 0; i < spectrumBands; i++) {
+          const val = Math.sin(i * 0.3 + time * 0.02) * 0.6 +
+                      Math.sin(i * 0.7 + time * 0.05) * 0.3 +
+                      Math.random() * 0.2;
+          spectrumAmps[i] = Math.max(0, Math.min(1, val * 0.8 + 0.3));
+        }
+        if (specgramHistory.length >= specgramHeight) specgramHistory.shift();
+        specgramHistory.push(new Float32Array(spectrumAmps));
+      }
+
+      // Автопилот: меняем основные параметры
+      function updateAutopilot() {
+        if (!autopilot || paused) return;
+        autopilotTimer += 0.005 * params.speed;
+        if (autopilotTimer > 1) {
+          autopilotTimer = 0;
+          const f = params.freq * (0.8 + Math.random() * 0.4);
+          const a = params.amp * (0.7 + Math.random() * 0.6);
+          const h = Math.min(5, Math.max(1, Math.round(params.harmonics + (Math.random()-0.5)*2)));
+          params.freq = Math.min(0.025, Math.max(0.002, f));
+          // округляем амплитуду до целого
+          params.amp = Math.round(Math.min(100, Math.max(10, a)));
+          params.harmonics = h;
+          freqSlider.value = params.freq;
+          ampSlider.value = params.amp;
+          harmSlider.value = params.harmonics;
+          freqVal.textContent = params.freq.toFixed(3);
+          ampVal.textContent = params.amp;
+          harmVal.textContent = params.harmonics;
+          updateWaves();
+        }
+      }
+
+      // Отрисовка
+      function draw() {
+        if (!paused) {
+          time += 0.5 * params.speed;
+        }
+        updateSpectrum();
+        updateAutopilot();
+
+        ctx.fillStyle = inverted ? 'rgba(240,240,240,0.12)' : 'rgba(10,10,10,0.15)';
+        ctx.fillRect(0, 0, width, height);
+
+        const grad = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, Math.max(width, height)*0.7);
+        if (inverted) {
+          grad.addColorStop(0, 'rgba(220,220,220,0.2)');
+          grad.addColorStop(1, 'rgba(200,200,200,0.3)');
+        } else {
+          grad.addColorStop(0, 'rgba(26,26,26,0.3)');
+          grad.addColorStop(1, 'rgba(5,5,5,0.4)');
+        }
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+
+        const numHarmonics = params.harmonics;
+        const centerY = height / 2;
+
+        switch(currentMode) {
+          case 'wave': drawWave(centerY, numHarmonics); break;
+          case 'spectrum': drawSpectrum(); break;
+          case 'lissajous': drawLissajous(centerY); break;
+          case 'surface': drawSurface(centerY); break;
+          case 'polar': drawPolar(centerY); break;
+          case 'phase': drawPhase(centerY); break;
+          case 'spectrogram': drawSpectrogram(); break;
+          default: drawWave(centerY, numHarmonics);
+        }
+
+        if (currentMode !== 'spectrogram' && currentMode !== 'spectrum') {
+          drawDecor();
+        }
+
+        requestAnimationFrame(draw);
+      }
+
+      // ---------- Режимы ----------
+      function drawWave(centerY, numHarmonics) {
+        const step = 1;
+        for (let w = 0; w < waves.length; w++) {
+          const wave = waves[w];
+          ctx.beginPath();
+          ctx.strokeStyle = wave.color;
+          const baseWidth = 1.2 + (waves.length - w) * 0.3;
+          const ampFactor = Math.max(0.5, wave.amp / 60);
+          ctx.lineWidth = baseWidth * ampFactor * 1.5;
+          ctx.shadowColor = inverted ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)';
+          ctx.shadowBlur = 10;
+          for (let x = 0; x < width; x += step) {
+            let y = 0;
+            for (let h = 1; h <= numHarmonics; h++) {
+              const freq = wave.freq * h * 1.1;
+              const amp = wave.amp / (h * 0.7 + 0.3);
+              const phase = wave.phase + h * 0.7 + params.phase; // добавляем общий сдвиг
+              y += amp * Math.sin(x * freq + time * 0.02 * h + phase);
+            }
+            const offset = Math.sin(x * 0.002 + time * 0.01) * 5;
+            const drawY = centerY + y + offset;
+            if (x === 0) ctx.moveTo(x, drawY);
+            else ctx.lineTo(x, drawY);
+          }
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        }
+      }
+
+      function drawSpectrum() {
+        const barWidth = width / spectrumBands;
+        const maxHeight = height * 0.7;
+        const startY = height * 0.15;
+        for (let i = 0; i < spectrumBands; i++) {
+          const amp = spectrumAmps[i];
+          const barHeight = amp * maxHeight;
+          const x = i * barWidth;
+          const brightness = inverted ? Math.floor(200 - amp * 150) : Math.floor(150 + amp * 100);
+          ctx.fillStyle = `rgba(${brightness},${brightness},${brightness},0.7)`;
+          ctx.fillRect(x, startY + maxHeight - barHeight, barWidth - 0.5, barHeight);
+        }
+        ctx.beginPath();
+        ctx.strokeStyle = inverted ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < spectrumBands; i++) {
+          const amp = spectrumAmps[i];
+          const barHeight = amp * maxHeight;
+          const x = i * barWidth + barWidth/2;
+          const y = startY + maxHeight - barHeight;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.fillStyle = inverted ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.12)';
+        ctx.font = '11px monospace';
+        ctx.fillText('SPECTRUM', 10, startY + maxHeight + 20);
+      }
+
+      function drawLissajous(centerY) {
+        const scaleX = width * 0.4;
+        const scaleY = height * 0.4;
+        const cx = width / 2;
+        const cy = height / 2;
+        const f1 = params.freq * 2;
+        const f2 = f1 * params.ratio; // используем соотношение
+        const amp1 = params.amp * 0.6;
+        const amp2 = params.amp * 0.6;
+        ctx.beginPath();
+        const steps = 300;
+        for (let i = 0; i <= steps; i++) {
+          const t = i / steps * Math.PI * 2 * 3;
+          const x = cx + amp1 * Math.sin(f1 * t + time * 0.02 + params.phase) * scaleX / 100;
+          const y = cy + amp2 * Math.sin(f2 * t + time * 0.03) * scaleY / 100;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = inverted ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.8)';
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = inverted ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
+        ctx.shadowBlur = 12;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = inverted ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 0.5;
+        ctx.setLineDash([4,6]);
+        ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(width, cy);
+        ctx.moveTo(cx, 0); ctx.lineTo(cx, height);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = inverted ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.15)';
+        ctx.font = '11px monospace';
+        ctx.fillText('LISSAJOUS', 10, 30);
+      }
+
+      function drawSurface(centerY) {
+        const rows = 60;
+        const cols = 80;
+        const cellW = width / cols;
+        const cellH = height / rows;
+        const amp = params.amp * 0.15;
+        const freq = params.freq * 10;
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const x = c / cols * width;
+            const y = r / rows * height;
+            const val = Math.sin(x * freq + time * 0.02 + params.phase) * Math.cos(y * freq * 0.7 + time * 0.015);
+            const z = val * amp * 1.5;
+            const px = x + z * 0.5;
+            const py = y + z * 0.3;
+            const bright = 150 + z * 0.8;
+            const alpha = 0.3 + 0.5 * (z / amp + 1) / 2;
+            ctx.fillStyle = inverted ?
+              `rgba(${255-bright},${255-bright},${255-bright},${alpha*0.6})` :
+              `rgba(${bright},${bright},${bright},${alpha*0.6})`;
+            ctx.fillRect(px - cellW/2, py - cellH/2, cellW, cellH);
+            ctx.strokeStyle = inverted ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+            ctx.lineWidth = 0.5;
+            ctx.strokeRect(px - cellW/2, py - cellH/2, cellW, cellH);
+          }
+        }
+        ctx.fillStyle = inverted ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.15)';
+        ctx.font = '11px monospace';
+        ctx.fillText('3D SURFACE', 10, 30);
+      }
+
+      function drawPolar(centerY) {
+        const cx = width/2;
+        const cy = height/2;
+        const maxR = Math.min(width, height) * 0.35;
+        const steps = 400;
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const angle = (i / steps) * Math.PI * 2 * 2;
+          const rad = params.amp * 0.4 + 20;
+          const r = rad * (0.5 + 0.5 * Math.sin(angle * params.freq * 30 + time * 0.03 + params.phase));
+          const x = cx + r * Math.cos(angle + time * 0.01);
+          const y = cy + r * Math.sin(angle + time * 0.01);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = inverted ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = inverted ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = inverted ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 0.5;
+        for (let r = 30; r < maxR; r += 30) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, 0, Math.PI*2);
+          ctx.stroke();
+        }
+        ctx.fillStyle = inverted ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.15)';
+        ctx.font = '11px monospace';
+        ctx.fillText('POLAR', 10, 30);
+      }
+
+      function drawPhase(centerY) {
+        const scale = 80;
+        const cx = width/2;
+        const cy = height/2;
+        const steps = 300;
+        const dt = 0.02;
+        let y = 0;
+        let dy = 0;
+        const damping = params.damping; // затухание
+        ctx.beginPath();
+        for (let i = 0; i < steps; i++) {
+          const force = -params.freq * params.freq * y - damping * dy + 0.5 * Math.sin(time * 0.02 + i * 0.01 + params.phase);
+          dy += force * dt;
+          y += dy * dt;
+          const px = cx + y * scale;
+          const py = cy + dy * scale * 0.5;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.strokeStyle = inverted ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)';
+        ctx.lineWidth = 1.2;
+        ctx.shadowBlur = 8;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = inverted ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 0.5;
+        ctx.setLineDash([4,6]);
+        ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(width, cy);
+        ctx.moveTo(cx, 0); ctx.lineTo(cx, height);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = inverted ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.15)';
+        ctx.font = '11px monospace';
+        ctx.fillText('PHASE PORTRAIT', 10, 30);
+      }
+
+      function drawSpectrogram() {
+        const h = height * 0.8;
+        const w = width;
+        const top = height * 0.1;
+        const bandHeight = h / specgramHeight;
+        const bandWidth = w / spectrumBands;
+        for (let row = 0; row < specgramHistory.length; row++) {
+          const data = specgramHistory[row];
+          if (!data) continue;
+          const y = top + (specgramHeight - 1 - row) * bandHeight;
+          for (let col = 0; col < spectrumBands; col++) {
+            const val = data[col] || 0;
+            const bright = Math.floor(255 * val);
+            const alpha = 0.6 + 0.4 * val;
+            ctx.fillStyle = inverted ?
+              `rgba(${255-bright},${255-bright},${255-bright},${alpha})` :
+              `rgba(${bright},${bright},${bright},${alpha})`;
+            ctx.fillRect(col * bandWidth, y, bandWidth, bandHeight + 0.5);
+          }
+        }
+        ctx.fillStyle = inverted ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.15)';
+        ctx.font = '11px monospace';
+        ctx.fillText('SPECTROGRAM', 10, top + 16);
+      }
+
+      // Декор
+      function drawDecor() {
+        ctx.fillStyle = inverted ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.03)';
+        for (let i = 0; i < 40; i++) {
+          const x = (i * 137.5 + time * 0.05) % width;
+          const y = (i * 97.3 + time * 0.025) % height;
+          ctx.beginPath();
+          ctx.arc(x, y, 1.2, 0, Math.PI*2);
+          ctx.fill();
+        }
+        const freqX = (time * 0.4) % width;
+        ctx.strokeStyle = inverted ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.04)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4,8]);
+        ctx.beginPath();
+        ctx.moveTo(freqX, 0);
+        ctx.lineTo(freqX, height);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      draw();
+      resetParams();
+
+      // Интерактивность мыши
+      document.addEventListener('mousemove', (e) => {
+        const glow = document.getElementById('cursorGlow');
+        glow.style.left = e.clientX + 'px';
+        glow.style.top = e.clientY + 'px';
+        if (currentMode === 'wave' || currentMode === 'lissajous') {
+          const x = e.clientX / width;
+          waves[0].phase = x * 6.28 + params.phase;
+        }
+      });
+      document.addEventListener('touchmove', (e) => {
+        const touch = e.touches[0];
+        if (touch) {
+          const x = touch.clientX / width;
+          if (currentMode === 'wave' || currentMode === 'lissajous') {
+            waves[0].phase = x * 6.28 + params.phase;
+          }
+        }
+      }, { passive: true });
+
+    })();
+  </script>
+</body>
+</html>
