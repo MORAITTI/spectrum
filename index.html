@@ -113,7 +113,7 @@
     .mode-buttons {
       display:flex; gap:4px; flex-wrap:wrap; margin-top:2px;
     }
-    .mode-btn, .invert-btn, .autopilot-btn, .screenshot-btn, .pause-btn {
+    .mode-btn, .invert-btn, .autopilot-btn, .screenshot-btn, .pause-btn, .lang-btn {
       background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
       color: rgba(255,255,255,0.4); padding:4px 8px; border-radius:6px;
       cursor:pointer; font-family:'Courier New', monospace; font-size:9px;
@@ -122,7 +122,7 @@
     }
     body.inverted .mode-btn, body.inverted .invert-btn,
     body.inverted .autopilot-btn, body.inverted .screenshot-btn,
-    body.inverted .pause-btn {
+    body.inverted .pause-btn, body.inverted .lang-btn {
       background:rgba(0,0,0,0.05); border-color:rgba(0,0,0,0.1); color:rgba(0,0,0,0.4);
     }
     .mode-btn.active {
@@ -132,12 +132,12 @@
       background:rgba(0,0,0,0.15); color:#000; border-color:rgba(0,0,0,0.3);
     }
     .mode-btn:hover, .invert-btn:hover, .autopilot-btn:hover,
-    .screenshot-btn:hover, .pause-btn:hover {
+    .screenshot-btn:hover, .pause-btn:hover, .lang-btn:hover {
       background:rgba(255,255,255,0.1); color:#fff;
     }
     body.inverted .mode-btn:hover, body.inverted .invert-btn:hover,
     body.inverted .autopilot-btn:hover, body.inverted .screenshot-btn:hover,
-    body.inverted .pause-btn:hover {
+    body.inverted .pause-btn:hover, body.inverted .lang-btn:hover {
       background:rgba(0,0,0,0.1); color:#000;
     }
     .autopilot-btn.active {
@@ -206,7 +206,7 @@
       .controls .val { font-size: 8px; min-width: 20px; }
       .digits { left: 6px; bottom: 40px; font-size: 9px; line-height: 1.5; }
       .credit { bottom: 6px; right: 8px; font-size: 9px; }
-      .mode-btn, .invert-btn, .autopilot-btn, .screenshot-btn, .pause-btn {
+      .mode-btn, .invert-btn, .autopilot-btn, .screenshot-btn, .pause-btn, .lang-btn {
         font-size: 6px; padding: 2px 4px; min-width: 26px;
       }
       .btn-reset { font-size: 8px; padding: 3px 6px; }
@@ -217,7 +217,7 @@
       .controls { right: 3px; bottom: 3px; padding: 6px 8px; min-width: 90px; }
       .controls input[type="range"] { width: 40px; }
       .digits { font-size: 7px; left: 3px; bottom: 30px; }
-      .mode-btn, .invert-btn, .autopilot-btn, .screenshot-btn, .pause-btn {
+      .mode-btn, .invert-btn, .autopilot-btn, .screenshot-btn, .pause-btn, .lang-btn {
         font-size: 5px; padding: 1px 3px; min-width: 18px;
       }
     }
@@ -231,36 +231,35 @@
   <div class="cursor-glow" id="cursorGlow"></div>
 
   <div class="content">
-    <h1>Спектр</h1>
-    <div class="sub">Harmonic Analysis</div>
+    <h1 id="mainTitle">Спектр</h1>
+    <div class="sub" id="mainSub">Гармонический анализ</div>
   </div>
 
   <div class="digits" id="digits">
-    <span>ЧАСТОТА  <span class="value" id="freqDisplay">0.008</span></span><br>
-    <span>АМПЛИТУДА <span class="value" id="ampDisplay">60</span></span><br>
-    <span>ГАРМОНИКИ <span class="value" id="harmDisplay">3</span></span><br>
-    <span>СКОРОСТЬ  <span class="value" id="speedDisplay">1.0</span></span>
+    <span class="digit-label" id="labelFreq">ЧАСТОТА</span>  <span class="value" id="freqDisplay">0.008</span><br>
+    <span class="digit-label" id="labelAmp">АМПЛИТУДА</span> <span class="value" id="ampDisplay">60</span><br>
+    <span class="digit-label" id="labelHarm">ГАРМОНИКИ</span> <span class="value" id="harmDisplay">3</span><br>
+    <span class="digit-label" id="labelSpeed">СКОРОСТЬ</span>  <span class="value" id="speedDisplay">1.0</span>
   </div>
 
   <div class="controls">
-    <label>Частота <input type="range" id="freqSlider" min="0.002" max="0.025" step="0.001" value="0.008"><span class="val" id="freqVal">0.008</span></label>
-    <label>Амплитуда <input type="range" id="ampSlider" min="10" max="100" step="1" value="60"><span class="val" id="ampVal">60</span></label>
-    <label>Гармоники <input type="range" id="harmSlider" min="1" max="5" step="1" value="3"><span class="val" id="harmVal">3</span></label>
-    <label>Скорость <input type="range" id="speedSlider" min="0.2" max="2.0" step="0.1" value="1.0"><span class="val" id="speedVal">1.0</span></label>
+    <label><span class="label-text">Частота</span> <input type="range" id="freqSlider" min="0.002" max="0.025" step="0.001" value="0.008"><span class="val" id="freqVal">0.008</span></label>
+    <label><span class="label-text">Амплитуда</span> <input type="range" id="ampSlider" min="10" max="100" step="1" value="60"><span class="val" id="ampVal">60</span></label>
+    <label><span class="label-text">Гармоники</span> <input type="range" id="harmSlider" min="1" max="5" step="1" value="3"><span class="val" id="harmVal">3</span></label>
+    <label><span class="label-text">Скорость</span> <input type="range" id="speedSlider" min="0.2" max="2.0" step="0.1" value="1.0"><span class="val" id="speedVal">1.0</span></label>
 
-    <!-- Новые слайдеры -->
-    <label>Фаза <input type="range" id="phaseSlider" min="0" max="6.28" step="0.01" value="0"><span class="val" id="phaseVal">0.00</span></label>
-    <label>Затухание <input type="range" id="dampingSlider" min="0" max="1" step="0.01" value="0.1"><span class="val" id="dampingVal">0.10</span></label>
-    <label>Отн. частот <input type="range" id="ratioSlider" min="0.5" max="3" step="0.1" value="1.5"><span class="val" id="ratioVal">1.5</span></label>
+    <label><span class="label-text">Фаза</span> <input type="range" id="phaseSlider" min="0" max="6.28" step="0.01" value="0"><span class="val" id="phaseVal">0.00</span></label>
+    <label><span class="label-text">Затухание</span> <input type="range" id="dampingSlider" min="0" max="1" step="0.01" value="0.1"><span class="val" id="dampingVal">0.10</span></label>
+    <label><span class="label-text">Отн. частот</span> <input type="range" id="ratioSlider" min="0.5" max="3" step="0.1" value="1.5"><span class="val" id="ratioVal">1.5</span></label>
 
     <div class="mode-buttons">
-      <button class="mode-btn active" data-mode="wave">Wave</button>
-      <button class="mode-btn" data-mode="spectrum">Spec</button>
-      <button class="mode-btn" data-mode="lissajous">Liss</button>
-      <button class="mode-btn" data-mode="surface">3D</button>
-      <button class="mode-btn" data-mode="polar">Polar</button>
-      <button class="mode-btn" data-mode="phase">Phase</button>
-      <button class="mode-btn" data-mode="spectrogram">Sgram</button>
+      <button class="mode-btn active" data-mode="wave" id="modeWave">Волна</button>
+      <button class="mode-btn" data-mode="spectrum" id="modeSpec">Спектр</button>
+      <button class="mode-btn" data-mode="lissajous" id="modeLiss">Лиссажу</button>
+      <button class="mode-btn" data-mode="surface" id="mode3D">3D</button>
+      <button class="mode-btn" data-mode="polar" id="modePolar">Полярные</button>
+      <button class="mode-btn" data-mode="phase" id="modePhase">Фаза</button>
+      <button class="mode-btn" data-mode="spectrogram" id="modeSgram">Спектрогр</button>
     </div>
 
     <div style="display:flex; gap:4px; flex-wrap:wrap;">
@@ -268,6 +267,7 @@
       <button class="autopilot-btn" id="autopilotBtn">▶ Авто</button>
       <button class="invert-btn" id="invertBtn">Invert</button>
       <button class="screenshot-btn" id="screenshotBtn">🖼 PNG</button>
+      <button class="lang-btn" id="langBtn">EN</button>
     </div>
 
     <button class="btn-reset" id="resetBtn">⟳ Сброс</button>
@@ -283,32 +283,155 @@
       let time = 0;
       let paused = false;
 
-      // DOM
-      const freqSlider = document.getElementById('freqSlider');
-      const ampSlider = document.getElementById('ampSlider');
-      const harmSlider = document.getElementById('harmSlider');
-      const speedSlider = document.getElementById('speedSlider');
-      const phaseSlider = document.getElementById('phaseSlider');
-      const dampingSlider = document.getElementById('dampingSlider');
-      const ratioSlider = document.getElementById('ratioSlider');
-      const freqVal = document.getElementById('freqVal');
-      const ampVal = document.getElementById('ampVal');
-      const harmVal = document.getElementById('harmVal');
-      const speedVal = document.getElementById('speedVal');
-      const phaseVal = document.getElementById('phaseVal');
-      const dampingVal = document.getElementById('dampingVal');
-      const ratioVal = document.getElementById('ratioVal');
-      const freqDisplay = document.getElementById('freqDisplay');
-      const ampDisplay = document.getElementById('ampDisplay');
-      const harmDisplay = document.getElementById('harmDisplay');
-      const speedDisplay = document.getElementById('speedDisplay');
-      const resetBtn = document.getElementById('resetBtn');
-      const invertBtn = document.getElementById('invertBtn');
-      const autopilotBtn = document.getElementById('autopilotBtn');
-      const pauseBtn = document.getElementById('pauseBtn');
-      const screenshotBtn = document.getElementById('screenshotBtn');
-      const modeBtns = document.querySelectorAll('.mode-btn');
+      // ---------- Язык ----------
+      let currentLang = 'ru'; // 'ru' или 'en'
 
+      const translations = {
+        ru: {
+          title: 'Спектр',
+          subtitle: 'Гармонический анализ',
+          freq: 'Частота',
+          amp: 'Амплитуда',
+          harm: 'Гармоники',
+          speed: 'Скорость',
+          phase: 'Фаза',
+          damping: 'Затухание',
+          ratio: 'Отн. частот',
+          modeWave: 'Волна',
+          modeSpec: 'Спектр',
+          modeLiss: 'Лиссажу',
+          mode3D: '3D',
+          modePolar: 'Полярные',
+          modePhase: 'Фаза',
+          modeSgram: 'Спектрогр',
+          pause: '⏸ Пауза',
+          pausePlay: '▶ Играть',
+          auto: '▶ Авто',
+          autoStop: '⏸ Авто',
+          invert: 'Invert',
+          png: '🖼 PNG',
+          reset: '⟳ Сброс',
+          labelFreq: 'ЧАСТОТА',
+          labelAmp: 'АМПЛИТУДА',
+          labelHarm: 'ГАРМОНИКИ',
+          labelSpeed: 'СКОРОСТЬ',
+          canvasSpec: 'СПЕКТР',
+          canvasLiss: 'ЛИССАЖУ',
+          canvas3D: '3D ПОВЕРХНОСТЬ',
+          canvasPolar: 'ПОЛЯРНЫЕ',
+          canvasPhase: 'ФАЗОВЫЙ ПОРТРЕТ',
+          canvasSgram: 'СПЕКТРОГРАММА'
+        },
+        en: {
+          title: 'Spectrum',
+          subtitle: 'Harmonic Analysis',
+          freq: 'Frequency',
+          amp: 'Amplitude',
+          harm: 'Harmonics',
+          speed: 'Speed',
+          phase: 'Phase',
+          damping: 'Damping',
+          ratio: 'Freq. ratio',
+          modeWave: 'Wave',
+          modeSpec: 'Spec',
+          modeLiss: 'Liss',
+          mode3D: '3D',
+          modePolar: 'Polar',
+          modePhase: 'Phase',
+          modeSgram: 'Sgram',
+          pause: '⏸ Pause',
+          pausePlay: '▶ Play',
+          auto: '▶ Auto',
+          autoStop: '⏸ Auto',
+          invert: 'Invert',
+          png: '🖼 PNG',
+          reset: '⟳ Reset',
+          labelFreq: 'FREQUENCY',
+          labelAmp: 'AMPLITUDE',
+          labelHarm: 'HARMONICS',
+          labelSpeed: 'SPEED',
+          canvasSpec: 'SPECTRUM',
+          canvasLiss: 'LISSAJOUS',
+          canvas3D: '3D SURFACE',
+          canvasPolar: 'POLAR',
+          canvasPhase: 'PHASE PORTRAIT',
+          canvasSgram: 'SPECTROGRAM'
+        }
+      };
+
+      // Элементы для перевода
+      const mainTitle = document.getElementById('mainTitle');
+      const mainSub = document.getElementById('mainSub');
+      const labelFreq = document.getElementById('labelFreq');
+      const labelAmp = document.getElementById('labelAmp');
+      const labelHarm = document.getElementById('labelHarm');
+      const labelSpeed = document.getElementById('labelSpeed');
+      const labelTexts = document.querySelectorAll('.label-text');
+      const modeWave = document.getElementById('modeWave');
+      const modeSpec = document.getElementById('modeSpec');
+      const modeLiss = document.getElementById('modeLiss');
+      const mode3D = document.getElementById('mode3D');
+      const modePolar = document.getElementById('modePolar');
+      const modePhase = document.getElementById('modePhase');
+      const modeSgram = document.getElementById('modeSgram');
+      const pauseBtn = document.getElementById('pauseBtn');
+      const autopilotBtn = document.getElementById('autopilotBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const langBtn = document.getElementById('langBtn');
+
+      function updateLanguage() {
+        const t = translations[currentLang];
+        mainTitle.textContent = t.title;
+        mainSub.textContent = t.subtitle;
+        labelFreq.textContent = t.labelFreq;
+        labelAmp.textContent = t.labelAmp;
+        labelHarm.textContent = t.labelHarm;
+        labelSpeed.textContent = t.labelSpeed;
+        // Обновляем подписи слайдеров (все .label-text)
+        const labelMap = {
+          'Частота': t.freq,
+          'Амплитуда': t.amp,
+          'Гармоники': t.harm,
+          'Скорость': t.speed,
+          'Фаза': t.phase,
+          'Затухание': t.damping,
+          'Отн. частот': t.ratio,
+          'Frequency': t.freq,
+          'Amplitude': t.amp,
+          'Harmonics': t.harm,
+          'Speed': t.speed,
+          'Phase': t.phase,
+          'Damping': t.damping,
+          'Freq. ratio': t.ratio
+        };
+        labelTexts.forEach(el => {
+          const old = el.textContent;
+          if (labelMap[old]) el.textContent = labelMap[old];
+        });
+        // Кнопки режимов
+        modeWave.textContent = t.modeWave;
+        modeSpec.textContent = t.modeSpec;
+        modeLiss.textContent = t.modeLiss;
+        mode3D.textContent = t.mode3D;
+        modePolar.textContent = t.modePolar;
+        modePhase.textContent = t.modePhase;
+        modeSgram.textContent = t.modeSgram;
+        // Кнопки управления
+        pauseBtn.textContent = paused ? t.pausePlay : t.pause;
+        autopilotBtn.textContent = autopilot ? t.autoStop : t.auto;
+        resetBtn.textContent = t.reset;
+        langBtn.textContent = currentLang === 'ru' ? 'EN' : 'RU';
+        // Invert и PNG не меняем
+      }
+
+      // Переключение языка
+      langBtn.addEventListener('click', function() {
+        currentLang = currentLang === 'ru' ? 'en' : 'ru';
+        updateLanguage();
+        // Текст на canvas обновится в следующем кадре, т.к. использует currentLang
+      });
+
+      // ---------- Основной код ----------
       const defaults = {
         freq: 0.008, amp: 60, harmonics: 3, speed: 1.0,
         phase: 0, damping: 0.1, ratio: 1.5
@@ -349,81 +472,79 @@
           waves[i].freq = baseFreq * (1.2 + i * 0.5);
           waves[i].amp = baseAmp / (1.2 + i * 0.3);
         }
-        // Обновляем отображение
-        freqDisplay.textContent = baseFreq.toFixed(3);
-        ampDisplay.textContent = Math.round(baseAmp);
-        harmDisplay.textContent = params.harmonics;
-        speedDisplay.textContent = params.speed.toFixed(1);
+        document.getElementById('freqDisplay').textContent = baseFreq.toFixed(3);
+        document.getElementById('ampDisplay').textContent = Math.round(baseAmp);
+        document.getElementById('harmDisplay').textContent = params.harmonics;
+        document.getElementById('speedDisplay').textContent = params.speed.toFixed(1);
       }
 
       function resetParams() {
         params = { ...defaults };
-        freqSlider.value = params.freq;
-        ampSlider.value = params.amp;
-        harmSlider.value = params.harmonics;
-        speedSlider.value = params.speed;
-        phaseSlider.value = params.phase;
-        dampingSlider.value = params.damping;
-        ratioSlider.value = params.ratio;
-        freqVal.textContent = params.freq.toFixed(3);
-        ampVal.textContent = Math.round(params.amp);
-        harmVal.textContent = params.harmonics;
-        speedVal.textContent = params.speed.toFixed(1);
-        phaseVal.textContent = params.phase.toFixed(2);
-        dampingVal.textContent = params.damping.toFixed(2);
-        ratioVal.textContent = params.ratio.toFixed(1);
+        document.getElementById('freqSlider').value = params.freq;
+        document.getElementById('ampSlider').value = params.amp;
+        document.getElementById('harmSlider').value = params.harmonics;
+        document.getElementById('speedSlider').value = params.speed;
+        document.getElementById('phaseSlider').value = params.phase;
+        document.getElementById('dampingSlider').value = params.damping;
+        document.getElementById('ratioSlider').value = params.ratio;
+        document.getElementById('freqVal').textContent = params.freq.toFixed(3);
+        document.getElementById('ampVal').textContent = Math.round(params.amp);
+        document.getElementById('harmVal').textContent = params.harmonics;
+        document.getElementById('speedVal').textContent = params.speed.toFixed(1);
+        document.getElementById('phaseVal').textContent = params.phase.toFixed(2);
+        document.getElementById('dampingVal').textContent = params.damping.toFixed(2);
+        document.getElementById('ratioVal').textContent = params.ratio.toFixed(1);
         updateWaves();
       }
 
       // Обработчики слайдеров
-      freqSlider.addEventListener('input', function() {
+      document.getElementById('freqSlider').addEventListener('input', function() {
         params.freq = parseFloat(this.value);
-        freqVal.textContent = params.freq.toFixed(3);
+        document.getElementById('freqVal').textContent = params.freq.toFixed(3);
         updateWaves();
       });
-      ampSlider.addEventListener('input', function() {
+      document.getElementById('ampSlider').addEventListener('input', function() {
         params.amp = parseFloat(this.value);
-        ampVal.textContent = Math.round(params.amp);
+        document.getElementById('ampVal').textContent = Math.round(params.amp);
         updateWaves();
       });
-      harmSlider.addEventListener('input', function() {
+      document.getElementById('harmSlider').addEventListener('input', function() {
         params.harmonics = parseInt(this.value);
-        harmVal.textContent = params.harmonics;
+        document.getElementById('harmVal').textContent = params.harmonics;
         updateWaves();
       });
-      speedSlider.addEventListener('input', function() {
+      document.getElementById('speedSlider').addEventListener('input', function() {
         params.speed = parseFloat(this.value);
-        speedVal.textContent = params.speed.toFixed(1);
+        document.getElementById('speedVal').textContent = params.speed.toFixed(1);
         updateWaves();
       });
-      phaseSlider.addEventListener('input', function() {
+      document.getElementById('phaseSlider').addEventListener('input', function() {
         params.phase = parseFloat(this.value);
-        phaseVal.textContent = params.phase.toFixed(2);
-        // обновляем фазу волн
+        document.getElementById('phaseVal').textContent = params.phase.toFixed(2);
         waves[0].phase = params.phase;
       });
-      dampingSlider.addEventListener('input', function() {
+      document.getElementById('dampingSlider').addEventListener('input', function() {
         params.damping = parseFloat(this.value);
-        dampingVal.textContent = params.damping.toFixed(2);
+        document.getElementById('dampingVal').textContent = params.damping.toFixed(2);
       });
-      ratioSlider.addEventListener('input', function() {
+      document.getElementById('ratioSlider').addEventListener('input', function() {
         params.ratio = parseFloat(this.value);
-        ratioVal.textContent = params.ratio.toFixed(1);
+        document.getElementById('ratioVal').textContent = params.ratio.toFixed(1);
       });
 
-      resetBtn.addEventListener('click', resetParams);
+      document.getElementById('resetBtn').addEventListener('click', resetParams);
 
       // Режимы
-      modeBtns.forEach(btn => {
+      document.querySelectorAll('.mode-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-          modeBtns.forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
           this.classList.add('active');
           currentMode = this.dataset.mode;
         });
       });
 
       // Инверсия
-      invertBtn.addEventListener('click', function() {
+      document.getElementById('invertBtn').addEventListener('click', function() {
         inverted = !inverted;
         document.body.classList.toggle('inverted', inverted);
         for (let w of waves) {
@@ -434,21 +555,23 @@
       });
 
       // Автопилот
-      autopilotBtn.addEventListener('click', function() {
+      document.getElementById('autopilotBtn').addEventListener('click', function() {
         autopilot = !autopilot;
         this.classList.toggle('active', autopilot);
-        this.textContent = autopilot ? '⏸ Авто' : '▶ Авто';
+        const t = translations[currentLang];
+        this.textContent = autopilot ? t.autoStop : t.auto;
       });
 
       // Пауза
-      pauseBtn.addEventListener('click', function() {
+      document.getElementById('pauseBtn').addEventListener('click', function() {
         paused = !paused;
         this.classList.toggle('active', paused);
-        this.textContent = paused ? '▶ Играть' : '⏸ Пауза';
+        const t = translations[currentLang];
+        this.textContent = paused ? t.pausePlay : t.pause;
       });
 
       // Скриншот
-      screenshotBtn.addEventListener('click', function() {
+      document.getElementById('screenshotBtn').addEventListener('click', function() {
         const link = document.createElement('a');
         link.download = 'spectrum_screenshot.png';
         link.href = canvas.toDataURL('image/png');
@@ -467,7 +590,7 @@
         specgramHistory.push(new Float32Array(spectrumAmps));
       }
 
-      // Автопилот: меняем основные параметры
+      // Автопилот
       function updateAutopilot() {
         if (!autopilot || paused) return;
         autopilotTimer += 0.005 * params.speed;
@@ -477,24 +600,21 @@
           const a = params.amp * (0.7 + Math.random() * 0.6);
           const h = Math.min(5, Math.max(1, Math.round(params.harmonics + (Math.random()-0.5)*2)));
           params.freq = Math.min(0.025, Math.max(0.002, f));
-          // округляем амплитуду до целого
           params.amp = Math.round(Math.min(100, Math.max(10, a)));
           params.harmonics = h;
-          freqSlider.value = params.freq;
-          ampSlider.value = params.amp;
-          harmSlider.value = params.harmonics;
-          freqVal.textContent = params.freq.toFixed(3);
-          ampVal.textContent = params.amp;
-          harmVal.textContent = params.harmonics;
+          document.getElementById('freqSlider').value = params.freq;
+          document.getElementById('ampSlider').value = params.amp;
+          document.getElementById('harmSlider').value = params.harmonics;
+          document.getElementById('freqVal').textContent = params.freq.toFixed(3);
+          document.getElementById('ampVal').textContent = params.amp;
+          document.getElementById('harmVal').textContent = params.harmonics;
           updateWaves();
         }
       }
 
       // Отрисовка
       function draw() {
-        if (!paused) {
-          time += 0.5 * params.speed;
-        }
+        if (!paused) time += 0.5 * params.speed;
         updateSpectrum();
         updateAutopilot();
 
@@ -550,7 +670,7 @@
             for (let h = 1; h <= numHarmonics; h++) {
               const freq = wave.freq * h * 1.1;
               const amp = wave.amp / (h * 0.7 + 0.3);
-              const phase = wave.phase + h * 0.7 + params.phase; // добавляем общий сдвиг
+              const phase = wave.phase + h * 0.7 + params.phase;
               y += amp * Math.sin(x * freq + time * 0.02 * h + phase);
             }
             const offset = Math.sin(x * 0.002 + time * 0.01) * 5;
@@ -589,7 +709,7 @@
         ctx.stroke();
         ctx.fillStyle = inverted ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.12)';
         ctx.font = '11px monospace';
-        ctx.fillText('SPECTRUM', 10, startY + maxHeight + 20);
+        ctx.fillText(translations[currentLang].canvasSpec, 10, startY + maxHeight + 20);
       }
 
       function drawLissajous(centerY) {
@@ -598,7 +718,7 @@
         const cx = width / 2;
         const cy = height / 2;
         const f1 = params.freq * 2;
-        const f2 = f1 * params.ratio; // используем соотношение
+        const f2 = f1 * params.ratio;
         const amp1 = params.amp * 0.6;
         const amp2 = params.amp * 0.6;
         ctx.beginPath();
@@ -625,7 +745,7 @@
         ctx.setLineDash([]);
         ctx.fillStyle = inverted ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.15)';
         ctx.font = '11px monospace';
-        ctx.fillText('LISSAJOUS', 10, 30);
+        ctx.fillText(translations[currentLang].canvasLiss, 10, 30);
       }
 
       function drawSurface(centerY) {
@@ -656,7 +776,7 @@
         }
         ctx.fillStyle = inverted ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.15)';
         ctx.font = '11px monospace';
-        ctx.fillText('3D SURFACE', 10, 30);
+        ctx.fillText(translations[currentLang].canvas3D, 10, 30);
       }
 
       function drawPolar(centerY) {
@@ -690,7 +810,7 @@
         }
         ctx.fillStyle = inverted ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.15)';
         ctx.font = '11px monospace';
-        ctx.fillText('POLAR', 10, 30);
+        ctx.fillText(translations[currentLang].canvasPolar, 10, 30);
       }
 
       function drawPhase(centerY) {
@@ -701,7 +821,7 @@
         const dt = 0.02;
         let y = 0;
         let dy = 0;
-        const damping = params.damping; // затухание
+        const damping = params.damping;
         ctx.beginPath();
         for (let i = 0; i < steps; i++) {
           const force = -params.freq * params.freq * y - damping * dy + 0.5 * Math.sin(time * 0.02 + i * 0.01 + params.phase);
@@ -726,7 +846,7 @@
         ctx.setLineDash([]);
         ctx.fillStyle = inverted ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.15)';
         ctx.font = '11px monospace';
-        ctx.fillText('PHASE PORTRAIT', 10, 30);
+        ctx.fillText(translations[currentLang].canvasPhase, 10, 30);
       }
 
       function drawSpectrogram() {
@@ -751,7 +871,7 @@
         }
         ctx.fillStyle = inverted ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.15)';
         ctx.font = '11px monospace';
-        ctx.fillText('SPECTROGRAM', 10, top + 16);
+        ctx.fillText(translations[currentLang].canvasSgram, 10, top + 16);
       }
 
       // Декор
@@ -775,8 +895,10 @@
         ctx.setLineDash([]);
       }
 
+      // Запуск
       draw();
       resetParams();
+      updateLanguage(); // установить язык по умолчанию
 
       // Интерактивность мыши
       document.addEventListener('mousemove', (e) => {
