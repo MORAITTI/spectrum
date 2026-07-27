@@ -1,105 +1,105 @@
-# Спектр — интерактивная лаборатория гармонического анализа
+# Spectrum — Interactive Harmonic Analysis Laboratory
 
-Экспериментальный веб-проект в чёрно-белом научном стиле, который визуализирует волны, спектры и сложные колебательные системы в реальном времени.  
-Создан для изучения физики, математики, обработки сигналов и просто для творческих экспериментов с абстрактными формами.
-
----
-
-## Что такое «спектр» и зачем это нужно?
-
-В физике и математике **спектр** — это разложение сложного сигнала на простые гармонические составляющие (синусоиды) с различными частотами и амплитудами.  
-Наш сайт позволяет **увидеть этот процесс** в интерактивной форме:
-
-- генерировать волны с разными параметрами;
-- наблюдать их суперпозицию;
-- видеть частотный состав (спектр);
-- исследовать фигуры Лиссажу и фазовые портреты.
-
-Это не просто «красивая анимация», а **наглядная демонстрация основ гармонического анализа**, полезная студентам, инженерам, художникам и всем любознательным.
+An experimental web project in a black‑and‑white scientific style that visualizes waves, spectra, and complex oscillatory systems in real time.  
+It is designed for exploring physics, mathematics, signal processing, and for creative experiments with abstract forms.
 
 ---
 
-## Возможности
+## What is a “spectrum” and why does it matter?
 
-### 7 режимов визуализации (переключаются кнопками)
+In physics and mathematics, a **spectrum** is the decomposition of a complex signal into its simple harmonic components (sine waves) with different frequencies and amplitudes.  
+This site lets you **see this process** interactively:
 
-| Режим | Описание |
-|-------|----------|
-| Wave | Классический осциллограф — несколько сложенных волн с регулируемым числом гармоник. |
-| Spectrum | Частотный спектр (амплитуды гармоник) в виде столбцов — как на экране анализатора спектра. |
-| Lissajous | Фигуры Лиссажу — траектории суммы двух взаимно перпендикулярных колебаний. Позволяют визуализировать соотношение частот. |
-| 3D Surface | Псевдо-трёхмерная поверхность, показывающая волну во времени и пространстве. |
-| Polar | Полярные координаты — амплитуда как радиус, время как угол. |
-| Phase | Фазовый портрет — зависимость скорости (производной) от координаты. Демонстрирует работу осциллятора с затуханием. |
-| Spectrogram | Бегущая спектрограмма (частотно-временная карта) — тепловая карта изменения спектра во времени. |
+- generate waves with various parameters;
+- observe their superposition;
+- view the frequency composition (spectrum);
+- explore Lissajous figures and phase portraits.
+
+This is not just a “nice animation” — it is a **visual demonstration of the fundamentals of harmonic analysis**, useful for students, engineers, artists, and the simply curious.
 
 ---
 
-### Интерактивные параметры (слайдеры)
+## Features
 
-- **Частота** — основная частота колебаний.
-- **Амплитуда** — «громкость» сигнала.
-- **Гармоники** — количество дополнительных гармоник (от 1 до 5).
-- **Скорость** — темп анимации.
-- **Фаза** — общий сдвиг всех волн (0–2π).
-- **Затухание** — коэффициент демпфирования (для фазового портрета).
-- **Отношение частот** — для фигур Лиссажу (соотношение двух частот).
+### 7 visualization modes (switchable by buttons)
 
----
-
-### Управление
-
-- **Авто** — режим автоматической смены параметров (генеративная анимация).
-- **Пауза** — заморозить время для детального рассмотрения.
-- **Invert** — инвертировать цвета (чёрный ↔ белый).
-- **PNG** — сохранить текущий кадр как изображение.
-- **Сброс** — вернуть все параметры к стандартным.
+| Mode       | Description |
+|------------|-------------|
+| Wave       | Classic oscilloscope – several superimposed waves with adjustable number of harmonics. |
+| Spectrum   | Frequency spectrum (harmonic amplitudes) as vertical bars – like a spectrum analyzer. |
+| Lissajous  | Lissajous figures – trajectories of two perpendicular oscillations. Visualise frequency ratios. |
+| 3D Surface | Pseudo‑3D surface showing a wave in time and space. |
+| Polar      | Polar coordinates – amplitude as radius, time as angle. |
+| Phase      | Phase portrait – velocity (derivative) vs. position. Demonstrates a damped oscillator. |
+| Spectrogram| Running spectrogram (time‑frequency map) – a heatmap of spectral evolution over time. |
 
 ---
 
-### Интерактивность
+### Interactive parameters (sliders)
 
-- Движение мыши или касание (на телефоне) меняет фазу волн в режимах **Wave** и **Lissajous** — можно «играть» с формой, просто водя по экрану.
-- За курсором тянется мягкое свечение — визуальный отклик.
-
----
-
-## Адаптивный дизайн
-
-Интерфейс автоматически подстраивается под любые экраны:
-- на компьютере — полноценная панель управления справа внизу;
-- на планшетах и телефонах — компактные элементы, оптимизированные для сенсорного ввода.
+- **Frequency** – fundamental oscillation frequency.
+- **Amplitude** – signal “loudness”.
+- **Harmonics** – number of additional harmonics (1 to 5).
+- **Speed** – animation tempo.
+- **Phase** – global phase shift of all waves (0–2π).
+- **Damping** – damping coefficient (for phase portrait).
+- **Frequency ratio** – for Lissajous figures (ratio of the two frequencies).
 
 ---
 
-## Технические детали
+### Controls
 
-- **Стек:** чистые HTML, CSS, JavaScript (без внешних библиотек).
-- **Графика:** Canvas 2D с эффектом послесвечения и теней.
-- **Стиль:** минимализм, акцент на геометрию и контраст, чёрно-белая палитра (с инверсией).
-- **Производительность:** оптимизировано для плавной работы даже на мобильных устройствах.
-
----
-
-## Как запустить
-
-1. Скачайте файл `index.html`.
-2. Откройте его в любом современном браузере (Chrome, Firefox, Safari, Edge).
-3. Наслаждайтесь!
+- **Auto** – automatic parameter cycling (generative animation).
+- **Pause** – freeze time for detailed inspection.
+- **Invert** – invert colours (black ↔ white).
+- **PNG** – save current frame as an image.
+- **Reset** – restore all parameters to default.
 
 ---
 
-## Лицензия
+### Interactivity
 
-Проект распространяется свободно для некоммерческого использования.  
-Автор — **MORAITTI**.
-
----
-
-## Вклад и развитие
-
-Если у вас есть идеи по улучшению (новые режимы, звуковой синтез, экспорт данных) — присылайте предложения, форкайте и экспериментируйте.
+- Mouse movement or touch (on phones) changes the phase of the waves in **Wave** and **Lissajous** modes – you can “play” with the shape just by dragging your finger or mouse.
+- A soft glow follows the cursor – a visual feedback.
 
 ---
 
-*Наука начинается с наблюдения. Наблюдайте и удивляйтесь.*
+## Responsive design
+
+The interface automatically adapts to any screen size:
+- on desktops – a full control panel at the bottom‑right;
+- on tablets and phones – compact elements optimised for touch input.
+
+---
+
+## Technical details
+
+- **Stack:** pure HTML, CSS, JavaScript (no external libraries).
+- **Graphics:** Canvas 2D with persistence and shadow effects.
+- **Style:** minimalistic, focused on geometry and contrast, black‑and‑white palette (with inversion).
+- **Performance:** optimised for smooth operation even on mobile devices.
+
+---
+
+## How to run
+
+1. Download the `index.html` file.
+2. Open it in any modern browser (Chrome, Firefox, Safari, Edge).
+3. Enjoy!
+
+---
+
+## License
+
+The project is distributed freely for non‑commercial use.  
+Author — **MORAITTI**.
+
+---
+
+## Contributions and development
+
+If you have ideas for improvements (new modes, sound synthesis, data export) – send suggestions, fork, and experiment.
+
+---
+
+*Science begins with observation. Observe and wonder.*
