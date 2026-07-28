@@ -3,7 +3,7 @@
 An experimental web project in a black‑and‑white scientific style that visualizes waves, spectra, and complex oscillatory systems in real time.  
 It is designed for exploring physics, mathematics, signal processing, and for creative experiments with abstract forms.
 
-[SPECTRUM](images/spectrum.png)
+![SPECTRUM](images/spectrum.png)
 
 ---
 
